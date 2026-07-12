@@ -1,0 +1,29 @@
+:root {
+  --bg-primary: #12141C;
+  --bg-panel: #171A24;
+  --bg-card: #1C1F2B;
+  --border-color: #2A2D3D;
+  --border-strong: #3A3E52;
+
+  --signal-green: #3DDC84;
+  --signal-amber: #FFB020;
+  --signal-red: #FF5C5C;
+  --signal-blue: #4FC3F7;
+
+  --text-primary: #E8E9EF;
+  --text-secondary: #8A8FA3;
+  --text-muted: #5C6070;
+
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-heading);
+  background: var(--bg-primary);
+}

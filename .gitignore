@@ -1,0 +1,26 @@
+# Environment variables (contains secrets - NEVER commit these)
+.env
+.env.local
+backend/.env
+frontend/.env
+
+# Dependencies (huge folders, regenerated from package.json)
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json

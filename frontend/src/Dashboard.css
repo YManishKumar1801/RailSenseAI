@@ -1,0 +1,122 @@
+.dashboard {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.dashboard-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dashboard-toggle button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 0.5px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-toggle button.active {
+  background: var(--signal-amber);
+  color: #1A1200;
+  border-color: var(--signal-amber);
+}
+
+.dashboard-summary {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+}
+
+.summary-value {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--signal-amber);
+}
+
+.summary-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-box {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    var(--bg-card);
+  border: 0.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px;
+  position: relative;
+}
+
+.chart-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--signal-amber), transparent 60%);
+  border-radius: 10px 10px 0 0;
+}
+
+.chart-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chart-box h3 {
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.chart-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+@media (max-width: 800px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-summary {
+    flex-direction: column;
+  }
+}
