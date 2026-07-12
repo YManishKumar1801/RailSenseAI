@@ -18,6 +18,22 @@ mongoose.connect(process.env.MONGO_URI)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const GEMINI_MODEL = "gemini-flash-latest";
 
+// Retries a Gemini call up to 2 extra times if the model is temporarily overloaded (503)
+async function generateWithRetry(params, retries = 2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (err) {
+      const isOverloaded = err.message && (err.message.includes('503') || err.message.includes('UNAVAILABLE'));
+      if (isOverloaded && attempt < retries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // wait 1s, then 2s
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 // ---- Route: Health check ----
 app.get('/', (req, res) => {
   res.json({ message: "RailSense AI backend is running!" });
@@ -95,7 +111,7 @@ User message: "${message}"
 Respond with ONLY a JSON object, no markdown, no explanation. Example:
 {"source": "Delhi", "destination": "Mumbai", "train_number": null, "train_name": null, "time_window": null}`;
 
-    const extractionResponse = await ai.models.generateContent({
+    const extractionResponse = await generateWithRetry({
       model: GEMINI_MODEL,
       contents: extractionPrompt
     });
@@ -155,7 +171,7 @@ Based on this data: ${queryContext}
 
 Write a short (2-4 sentence) natural language response recommending the best option and briefly explaining why (mention punctuality score and typical delay if relevant). ${extracted.time_window ? `The user specifically asked about the last ${extracted.time_window} days, so reference that window's on-time percentage explicitly.` : ""} If no trains were found, say so politely. Do not use markdown formatting.`;
 
-    const replyResponse = await ai.models.generateContent({
+    const replyResponse = await generateWithRetry({
       model: GEMINI_MODEL,
       contents: replyPrompt
     });
@@ -173,7 +189,11 @@ Write a short (2-4 sentence) natural language response recommending the best opt
 
   } catch (err) {
     console.error("Chat error:", err.message);
-    res.status(500).json({ error: "Something went wrong with the AI assistant.", details: err.message });
+    const isOverloaded = err.message && (err.message.includes('503') || err.message.includes('UNAVAILABLE'));
+    const friendlyMessage = isOverloaded
+      ? "The AI assistant is temporarily busy (this is a Google server issue, not a bug). Please try again in a few seconds."
+      : "Something went wrong with the AI assistant.";
+    res.status(500).json({ error: friendlyMessage, details: err.message });
   }
 });
 
