@@ -1,3 +1,9 @@
+// Main backend server - handles all API requests, now with Gemini AI chat
+//
+// HOW TO RUN:
+// 1. Replace your existing server.js inside the backend folder with this file
+// 2. In terminal (inside backend folder), run: node server.js
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -194,6 +200,33 @@ Write a short (2-4 sentence) natural language response recommending the best opt
       ? "The AI assistant is temporarily busy (this is a Google server issue, not a bug). Please try again in a few seconds."
       : "Something went wrong with the AI assistant.";
     res.status(500).json({ error: friendlyMessage, details: err.message });
+  }
+});
+
+// ---- Route: ML-predicted delay for a specific train and date ----
+app.post('/api/predict-delay', async (req, res) => {
+  try {
+    const { train_number, date } = req.body;
+    if (!train_number || !date) {
+      return res.status(400).json({ error: "train_number and date are required" });
+    }
+
+    const mlResponse = await fetch('http://localhost:5001/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ train_number, date })
+    });
+
+    if (!mlResponse.ok) {
+      const errData = await mlResponse.json();
+      return res.status(mlResponse.status).json(errData);
+    }
+
+    const result = await mlResponse.json();
+    res.json(result);
+  } catch (err) {
+    // ML service might not be running - fail gracefully so the frontend can fall back
+    res.status(503).json({ error: "ML prediction service unavailable", details: err.message });
   }
 });
 

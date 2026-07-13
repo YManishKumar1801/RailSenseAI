@@ -42,18 +42,36 @@ function JourneyRiskAnalyzer({ train }) {
   const [eventDateTime, setEventDateTime] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [calculating, setCalculating] = useState(false);
 
-  function calculate() {
+  async function calculate() {
     setError('');
     if (!journeyDate || !eventDateTime) {
       setError('Please fill in both the journey date and your event date/time.');
       return;
     }
 
+    setCalculating(true);
+
+    // Try to get an ML-predicted delay for this specific date; fall back to the
+    // train's historical average if the ML service is unavailable.
+    let expectedDelay = train.avg_delay_minutes;
+    let usedML = false;
+    try {
+      const res = await axios.post(`${API_BASE}/api/predict-delay`, {
+        train_number: train.train_number,
+        date: journeyDate
+      });
+      expectedDelay = res.data.predicted_delay_minutes;
+      usedML = true;
+    } catch (err) {
+      // ML service down or train not recognized - silently fall back to average
+    }
+
     const departureDT = new Date(`${journeyDate}T${train.departure_time}`);
     const journeyMinutes = parseDurationToMinutes(train.duration);
     const scheduledArrivalDT = new Date(departureDT.getTime() + journeyMinutes * 60000);
-    const likelyArrivalDT = new Date(scheduledArrivalDT.getTime() + train.avg_delay_minutes * 60000);
+    const likelyArrivalDT = new Date(scheduledArrivalDT.getTime() + expectedDelay * 60000);
     const eventDT = new Date(eventDateTime);
 
     const bufferMinutes = Math.round((eventDT - likelyArrivalDT) / 60000);
@@ -72,9 +90,12 @@ function JourneyRiskAnalyzer({ train }) {
     setResult({
       scheduledArrivalLabel: scheduledArrivalDT.toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
       likelyArrivalLabel: likelyArrivalDT.toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+      expectedDelay,
+      usedML,
       bufferMinutes,
       risk
     });
+    setCalculating(false);
   }
 
   return (
@@ -101,7 +122,7 @@ function JourneyRiskAnalyzer({ train }) {
               onChange={e => setEventDateTime(e.target.value)}
               className="risk-full-input"
             />
-            <button onClick={calculate}>Calculate</button>
+            <button onClick={calculate} disabled={calculating}>{calculating ? 'Calculating...' : 'Calculate'}</button>
           </div>
 
           {error && <div className="risk-error">{error}</div>}
@@ -113,6 +134,10 @@ function JourneyRiskAnalyzer({ train }) {
               <div className="risk-details">
                 <span>Scheduled arrival: {result.scheduledArrivalLabel}</span>
                 <span>Likely arrival (with delay): {result.likelyArrivalLabel}</span>
+                <span>
+                  Expected delay: ~{result.expectedDelay} min
+                  {result.usedML ? ' (ML-predicted)' : ' (historical average)'}
+                </span>
               </div>
             </div>
           )}
