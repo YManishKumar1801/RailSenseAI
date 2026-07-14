@@ -25,7 +25,7 @@ const chartTextColor = '#8A8FA3';
 const gridColor = '#232636';
 const monoFont = { family: "'IBM Plex Mono', monospace", size: 10 };
 
-// Center-readout plugin for the doughnut chart (digital gauge look)
+
 const centerTextPlugin = {
   id: 'centerText',
   afterDraw(chart) {
@@ -65,7 +65,7 @@ const commonOptions = {
   }
 };
 
-// Adds a translucent fill + solid border color to a hex color, for the "readout bar" look
+
 function readoutStyle(hex) {
   return { backgroundColor: hex + '33', borderColor: hex };
 }

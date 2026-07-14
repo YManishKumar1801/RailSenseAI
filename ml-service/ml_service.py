@@ -1,20 +1,3 @@
-"""
-Step 3 (ML): Flask microservice that serves delay predictions from the trained model.
-
-HOW TO RUN:
-1. Save this file as ml_service.py inside the ml-service folder
-2. Make sure delay_model.pkl, train_encoder.pkl, day_encoder.pkl already exist
-   (from running train_ml_model.py)
-3. In terminal (inside ml-service folder), run: python ml_service.py
-4. It starts a server on http://localhost:5001
-   Keep this terminal running - it needs to stay open alongside your other servers.
-
-ENDPOINT:
-POST /predict
-Body: { "train_number": "12951", "date": "2026-07-15" }
-Returns: { "predicted_delay_minutes": 12, "day_of_week": "Wednesday" }
-"""
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -24,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Load the trained model and encoders once at startup
+
 model = joblib.load("delay_model.pkl")
 le_train = joblib.load("train_encoder.pkl")
 le_day = joblib.load("day_encoder.pkl")
@@ -57,7 +40,7 @@ def predict():
     day_of_week = date_obj.strftime("%A")
     month = date_obj.month
 
-    # If this specific day-of-week wasn't seen in training (shouldn't happen, but just in case)
+    
     if day_of_week not in le_day.classes_:
         return jsonify({"error": f"Unrecognized day: {day_of_week}"}), 400
 

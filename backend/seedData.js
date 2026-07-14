@@ -1,24 +1,14 @@
-// This script generates trains for EVERY route combination among 10 major
-// metro cities (round-robin, both directions), with exactly 3 trains per
-// route (one reliable, one average, one poor performer).
-// Total: 10 cities x 9 other cities x 3 trains = 270 trains.
-//
-// HOW TO RUN:
-// 1. Replace your existing seedData.js inside the backend folder with this file
-// 2. In terminal (inside backend folder), run: node seedData.js
-// (This may take 15-30 seconds since it's inserting 270 records)
-
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Train = require('./models/Train');
 
-// ---- 10 Metro Cities ----
+
 const metroCities = [
   "Delhi", "Mumbai", "Kolkata", "Chennai", "Bangalore",
   "Hyderabad", "Pune", "Ahmedabad", "Jaipur", "Lucknow"
 ];
 
-// Real named trains kept for realism, mapped to their route if it matches
+
 const namedTrainOverrides = {
   "Mumbai-Delhi": ["12951", "Mumbai Rajdhani"],
   "Kolkata-Delhi": ["12301", "Howrah Rajdhani"],
@@ -36,13 +26,11 @@ const trainTypes = ["Express", "SF Express", "Superfast", "Jan Shatabdi", "Inter
 
 let trainCounter = 13001;
 
-// Each route gets 3 trains with a deliberate "story" so that a DIFFERENT train
-// wins each time window (30d / 60d / 90d) - this makes the time-window-aware
-// chat feature actually demonstrable, instead of the same train always winning.
+
 const windowProfiles = [
-  { d30: 80, d60: 85, d90: 92 },  // Train A: consistent long-term performer (best in 90d)
-  { d30: 90, d60: 76, d90: 60 },  // Train B: recently improved (best in 30d)
-  { d30: 68, d60: 90, d90: 74 },  // Train C: mid-term standout (best in 60d)
+  { d30: 80, d60: 85, d90: 92 }, 
+  { d30: 90, d60: 76, d90: 60 },  
+  { d30: 68, d60: 90, d90: 74 },  
 ];
 
 function randomTime() {
@@ -57,8 +45,7 @@ function randomDuration() {
   return `${totalHours}h ${extraMin.toString().padStart(2, "0")}m`;
 }
 
-// Generates exactly 3 trains for a route, each assigned a different window profile
-// so a different train wins the 30d / 60d / 90d window (see windowProfiles above)
+
 function threeTrainsForRoute(source, destination) {
   const key = `${source}-${destination}`;
 
@@ -66,7 +53,7 @@ function threeTrainsForRoute(source, destination) {
   windowProfiles.forEach((profile, i) => {
     let number, name;
     if (i === 0 && namedTrainOverrides[key]) {
-      // Named legacy trains (Rajdhani/Shatabdi etc) fit the "consistent long-term performer" story
+      
       [number, name] = namedTrainOverrides[key];
     } else {
       number = (trainCounter++).toString();
@@ -84,7 +71,7 @@ function threeTrainsForRoute(source, destination) {
   return trains;
 }
 
-// ---- Build full dataset: every ordered pair among the 10 metro cities ----
+
 let trainsData = [];
 for (const source of metroCities) {
   for (const destination of metroCities) {
@@ -99,7 +86,7 @@ function generateScores(profile) {
   const on_time_pct_60d = Math.min(99, Math.max(10, profile.d60 + jitter()));
   const on_time_pct_90d = Math.min(99, Math.max(10, profile.d90 + jitter()));
 
-  // Recent (30d) performance drives the "typical" delay used in day-to-day predictions
+  
   const avg_delay_minutes = Math.round((100 - on_time_pct_30d) * 0.5 + Math.random() * 6);
 
   const punctuality_score = Math.round(

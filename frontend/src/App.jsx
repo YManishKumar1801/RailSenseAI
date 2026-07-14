@@ -22,7 +22,7 @@ function formatMinutes(mins) {
   return `${sign}${h}h ${m}m`;
 }
 
-// Parses "32h 45m" style duration strings into total minutes
+
 function parseDurationToMinutes(duration) {
   const match = duration.match(/(\d+)h\s*(\d+)?m?/);
   if (!match) return 0;
@@ -32,10 +32,10 @@ function parseDurationToMinutes(duration) {
 }
 
 function todayDateString() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  return new Date().toISOString().slice(0, 10); 
 }
 
-// ---- Journey Risk Analyzer (part of each TrainCard) ----
+
 function JourneyRiskAnalyzer({ train }) {
   const [open, setOpen] = useState(false);
   const [journeyDate, setJourneyDate] = useState(todayDateString());
@@ -53,8 +53,8 @@ function JourneyRiskAnalyzer({ train }) {
 
     setCalculating(true);
 
-    // Try to get an ML-predicted delay for this specific date; fall back to the
-    // train's historical average if the ML service is unavailable.
+     
+    
     let expectedDelay = train.avg_delay_minutes;
     let usedML = false;
     try {
@@ -65,7 +65,7 @@ function JourneyRiskAnalyzer({ train }) {
       expectedDelay = res.data.predicted_delay_minutes;
       usedML = true;
     } catch (err) {
-      // ML service down or train not recognized - silently fall back to average
+      
     }
 
     const departureDT = new Date(`${journeyDate}T${train.departure_time}`);
@@ -193,14 +193,14 @@ function ResultList({ trains }) {
 function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [view, setView] = useState('chat'); // 'chat' or 'dashboard'
+  const [view, setView] = useState('chat'); 
 
   const DEFAULT_MESSAGE = { sender: 'bot', text: "Hi! I'm RailSense AI. Ask me about trains — e.g. 'Delhi to Chennai' or 'train 12951 status'." };
 
   const [messages, setMessages] = useState([DEFAULT_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [lastSearch, setLastSearch] = useState(null); // { label, trains }
+  const [lastSearch, setLastSearch] = useState(null); 
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -214,7 +214,7 @@ function App() {
           try {
             setMessages(JSON.parse(saved));
           } catch (e) {
-            // If saved data is corrupted, just keep the default welcome message
+            
           }
         }
       }
@@ -222,7 +222,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Auto-save chat history whenever it changes
+  
   useEffect(() => {
     if (user) {
       localStorage.setItem(`railsense_chat_${user.uid}`, JSON.stringify(messages));
@@ -255,7 +255,7 @@ function App() {
       if (trains && trains.length > 0) {
         setMessages(prev => [...prev, { sender: 'bot', text: reply, type: 'resultList', trains }]);
 
-        // Build a readable label for this search, to show on the Dashboard
+        
         let label = "Recent Search";
         if (context?.train_number) label = `Train #${context.train_number}`;
         else if (context?.train_name) label = context.train_name;

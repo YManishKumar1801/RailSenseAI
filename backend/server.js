@@ -1,9 +1,3 @@
-// Main backend server - handles all API requests, now with Gemini AI chat
-//
-// HOW TO RUN:
-// 1. Replace your existing server.js inside the backend folder with this file
-// 2. In terminal (inside backend folder), run: node server.js
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -15,16 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ---- Connect to MongoDB ----
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB connection error:", err.message));
 
-// ---- Connect to Gemini ----
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const GEMINI_MODEL = "gemini-flash-latest";
 
-// Retries a Gemini call up to 2 extra times if the model is temporarily overloaded (503)
+
 async function generateWithRetry(params, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -40,12 +34,12 @@ async function generateWithRetry(params, retries = 2) {
   }
 }
 
-// ---- Route: Health check ----
+
 app.get('/', (req, res) => {
   res.json({ message: "RailSense AI backend is running!" });
 });
 
-// ---- Route: Get all trains ----
+
 app.get('/api/trains', async (req, res) => {
   try {
     const trains = await Train.find().sort({ punctuality_score: -1 });
@@ -55,7 +49,7 @@ app.get('/api/trains', async (req, res) => {
   }
 });
 
-// ---- Route: Search by train number ----
+
 app.get('/api/trains/:number', async (req, res) => {
   try {
     const train = await Train.findOne({ train_number: req.params.number });
@@ -66,7 +60,7 @@ app.get('/api/trains/:number', async (req, res) => {
   }
 });
 
-// ---- Route: Search by source + destination ----
+
 app.get('/api/search', async (req, res) => {
   try {
     const { source, destination } = req.query;
@@ -91,17 +85,17 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// ---- Route: AI Chat (Gemini-powered) ----
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required" });
 
-    // Get list of known stations to help Gemini match correctly
+    
     const allTrains = await Train.find();
     const knownStations = [...new Set(allTrains.flatMap(t => [t.source, t.destination]))];
 
-    // ---- Step 1: Ask Gemini to extract structured info from the message ----
+    
     const extractionPrompt = `You are an entity extractor for an Indian train search app.
 Known stations: ${knownStations.join(", ")}
 
@@ -130,7 +124,7 @@ Respond with ONLY a JSON object, no markdown, no explanation. Example:
       return res.json({ reply: "I couldn't understand that. Try something like 'Delhi to Mumbai', a train name, or a 5-digit train number.", trains: [] });
     }
 
-    // ---- Step 2: Query the database based on extracted info ----
+    
     let trains = [];
     let queryContext = "";
 
@@ -171,7 +165,7 @@ Respond with ONLY a JSON object, no markdown, no explanation. Example:
       });
     }
 
-    // ---- Step 3: Ask Gemini to write a natural language recommendation ----
+ 
     const replyPrompt = `You are RailSense AI, a friendly train recommendation assistant.
 Based on this data: ${queryContext}
 
@@ -203,7 +197,7 @@ Write a short (2-4 sentence) natural language response recommending the best opt
   }
 });
 
-// ---- Route: ML-predicted delay for a specific train and date ----
+
 app.post('/api/predict-delay', async (req, res) => {
   try {
     const { train_number, date } = req.body;
@@ -225,12 +219,12 @@ app.post('/api/predict-delay', async (req, res) => {
     const result = await mlResponse.json();
     res.json(result);
   } catch (err) {
-    // ML service might not be running - fail gracefully so the frontend can fall back
+   
     res.status(503).json({ error: "ML prediction service unavailable", details: err.message });
   }
 });
 
-// ---- Route: Analytics data for dashboard charts ----
+
 app.get('/api/analytics', async (req, res) => {
   try {
     const allTrains = await Train.find();
@@ -243,7 +237,7 @@ app.get('/api/analytics', async (req, res) => {
     const topTrains = sorted.slice(0, 10).map(t => ({ name: t.train_name, score: t.punctuality_score }));
     const bottomTrains = sorted.slice(-10).reverse().map(t => ({ name: t.train_name, score: t.punctuality_score }));
 
-    // Risk distribution based on punctuality score
+    
     let safe = 0, moderate = 0, risky = 0;
     allTrains.forEach(t => {
       if (t.punctuality_score >= 80) safe++;
@@ -251,7 +245,7 @@ app.get('/api/analytics', async (req, res) => {
       else risky++;
     });
 
-    // Overall average on-time percentage across 30/60/90 day windows
+   
     const avg30 = allTrains.reduce((sum, t) => sum + t.on_time_pct_30d, 0) / allTrains.length;
     const avg60 = allTrains.reduce((sum, t) => sum + t.on_time_pct_60d, 0) / allTrains.length;
     const avg90 = allTrains.reduce((sum, t) => sum + t.on_time_pct_90d, 0) / allTrains.length;
@@ -272,7 +266,7 @@ app.get('/api/analytics', async (req, res) => {
   }
 });
 
-// ---- Start the server ----
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

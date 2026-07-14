@@ -1,20 +1,3 @@
-"""
-Step 1 (ML): Generate historical daily delay records for all trains.
-
-This pulls the current train list from your running backend (MongoDB data),
-then generates 90 days of realistic daily delay history for each train,
-consistent with that train's overall punctuality profile.
-
-REQUIREMENTS: Your backend (node server.js) must be running on port 5000,
-since this script fetches the live train list from it.
-
-HOW TO RUN:
-1. Save this file as generate_historical_data.py inside the ml-service folder
-2. Make sure backend is running (node server.js) in another terminal
-3. In terminal (inside ml-service folder), run: python generate_historical_data.py
-4. It creates historical_data.csv in this folder
-"""
-
 import requests
 import pandas as pd
 import numpy as np
@@ -36,8 +19,7 @@ for train in trains:
     source = train["source"]
     destination = train["destination"]
 
-    # Use this train's current avg_delay_minutes and punctuality_score
-    # as the "center" around which daily history is generated
+
     base_avg_delay = train["avg_delay_minutes"]
     base_score = train["punctuality_score"]
     on_time_chance = base_score / 100
@@ -46,7 +28,7 @@ for train in trains:
         date = today - timedelta(days=days_ago)
         month = date.month
 
-        # Fog season (Dec-Jan) makes trains less punctual
+        
         season_penalty = 0.15 if month in [12, 1] else 0.0
         daily_on_time_chance = max(0.1, on_time_chance - season_penalty)
 
