@@ -1,3 +1,13 @@
+// This script generates trains for EVERY route combination among 10 major
+// metro cities (round-robin, both directions), with exactly 3 trains per
+// route (one reliable, one average, one poor performer).
+// Total: 10 cities x 9 other cities x 3 trains = 270 trains.
+//
+// HOW TO RUN:
+// 1. Replace your existing seedData.js inside the backend folder with this file
+// 2. In terminal (inside backend folder), run: node seedData.js
+// (This may take 15-30 seconds since it's inserting 270 records)
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Train = require('./models/Train');
@@ -26,6 +36,15 @@ const trainTypes = ["Express", "SF Express", "Superfast", "Jan Shatabdi", "Inter
 
 let trainCounter = 13001;
 
+// Each route gets 3 trains with a deliberate "story" so that a DIFFERENT train
+// wins each time window (30d / 60d / 90d) - this makes the time-window-aware
+// chat feature actually demonstrable, instead of the same train always winning.
+const windowProfiles = [
+  { d30: 80, d60: 85, d90: 92 },  // Train A: consistent long-term performer (best in 90d)
+  { d30: 90, d60: 76, d90: 60 },  // Train B: recently improved (best in 30d)
+  { d30: 68, d60: 90, d90: 74 },  // Train C: mid-term standout (best in 60d)
+];
+
 function randomTime() {
   const hour = Math.floor(Math.random() * 24).toString().padStart(2, "0");
   const min = [0, 15, 30, 45][Math.floor(Math.random() * 4)].toString().padStart(2, "0");
@@ -38,19 +57,16 @@ function randomDuration() {
   return `${totalHours}h ${extraMin.toString().padStart(2, "0")}m`;
 }
 
-// Generates exactly 3 trains for a route: one reliable, one average, one poor
+// Generates exactly 3 trains for a route, each assigned a different window profile
+// so a different train wins the 30d / 60d / 90d window (see windowProfiles above)
 function threeTrainsForRoute(source, destination) {
   const key = `${source}-${destination}`;
-  const tiers = [
-    0.85 + Math.random() * 0.10,  // ~85-95% - reliable
-    0.60 + Math.random() * 0.15,  // ~60-75% - average
-    0.35 + Math.random() * 0.15,  // ~35-50% - poor
-  ];
 
   const trains = [];
-  tiers.forEach((reliability, i) => {
+  windowProfiles.forEach((profile, i) => {
     let number, name;
     if (i === 0 && namedTrainOverrides[key]) {
+      // Named legacy trains (Rajdhani/Shatabdi etc) fit the "consistent long-term performer" story
       [number, name] = namedTrainOverrides[key];
     } else {
       number = (trainCounter++).toString();
@@ -61,7 +77,7 @@ function threeTrainsForRoute(source, destination) {
     trains.push([
       number, name, source, destination,
       randomTime(), randomTime(), randomDuration(),
-      Math.round(reliability * 100) / 100
+      profile
     ]);
   });
 
@@ -77,20 +93,20 @@ for (const source of metroCities) {
   }
 }
 
-// ---- Score calculation ----
-function generateScores(baseReliability) {
+function generateScores(profile) {
   const jitter = () => (Math.random() * 6) - 3;
-  const on_time_pct_30d = Math.min(99, Math.max(10, baseReliability * 100 + jitter()));
-  const on_time_pct_60d = Math.min(99, Math.max(10, baseReliability * 100 + jitter()));
-  const on_time_pct_90d = Math.min(99, Math.max(10, baseReliability * 100 + jitter()));
+  const on_time_pct_30d = Math.min(99, Math.max(10, profile.d30 + jitter()));
+  const on_time_pct_60d = Math.min(99, Math.max(10, profile.d60 + jitter()));
+  const on_time_pct_90d = Math.min(99, Math.max(10, profile.d90 + jitter()));
 
-  const avg_delay_minutes = Math.round((1 - baseReliability) * 60 + Math.random() * 8);
+  // Recent (30d) performance drives the "typical" delay used in day-to-day predictions
+  const avg_delay_minutes = Math.round((100 - on_time_pct_30d) * 0.5 + Math.random() * 6);
 
   const punctuality_score = Math.round(
     (0.5 * on_time_pct_30d) + (0.3 * on_time_pct_60d) + (0.2 * on_time_pct_90d)
   );
 
-  const isPremium = baseReliability >= 0.8;
+  const isPremium = profile.d90 >= 85;
   const cleanliness_score = isPremium
     ? Math.round(80 + Math.random() * 15)
     : Math.round(45 + Math.random() * 30);
@@ -115,8 +131,8 @@ async function seedDatabase() {
     await Train.deleteMany({});
 
     console.log(`Generating and inserting ${trainsData.length} train records...`);
-    const records = trainsData.map(([number, name, source, dest, dep, arr, duration, reliability]) => {
-      const scores = generateScores(reliability);
+    const records = trainsData.map(([number, name, source, dest, dep, arr, duration, profile]) => {
+      const scores = generateScores(profile);
       return {
         train_number: number,
         train_name: name,
