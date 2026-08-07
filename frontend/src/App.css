@@ -1,10 +1,19 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
 .app {
   max-width: 700px;
   margin: 0 auto;
-  height: 100vh;
+  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
+  overflow: hidden;
 }
 
 .app-wide {
@@ -160,6 +169,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 12px;
 }
 
@@ -167,23 +177,37 @@
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 15px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .train-number {
+  flex-shrink: 0;
   font-family: var(--font-mono);
   color: var(--text-muted);
   font-size: 12px;
 }
 
 .route-line {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 14px;
+  gap: 6px;
 }
 
 .route-point {
-  text-align: center;
+  min-width: 0;
+}
+
+.route-line .route-point:first-child {
+  text-align: left;
+}
+
+.route-line .route-point:last-child {
+  text-align: right;
 }
 
 .route-time {
@@ -204,12 +228,14 @@
   font-size: 11px;
   color: var(--text-secondary);
   white-space: nowrap;
-  padding: 0 10px;
+  text-align: center;
 }
 
 .stats-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: start;
+  gap: 8px;
   border-top: 0.5px solid var(--border-color);
   padding-top: 10px;
   margin-bottom: 10px;
@@ -218,7 +244,22 @@
 .stat {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.stats-row .stat:first-child {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.stats-row .stat:nth-child(2) {
   align-items: center;
+  text-align: center;
+}
+
+.stats-row .stat:last-child {
+  align-items: flex-end;
+  text-align: right;
 }
 
 .stat-label {
@@ -415,4 +456,161 @@
   font-family: var(--font-mono);
   font-size: 11px;
   margin-top: 6px;
+}
+
+/* Message entrance animation - subtle, not jarring */
+.message {
+  animation: message-in 0.25s ease-out;
+}
+
+@keyframes message-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animated "thinking" dots instead of plain text */
+.thinking-bubble {
+  padding: 14px 16px;
+}
+
+.thinking-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal-amber);
+  animation: thinking-bounce 1.4s infinite ease-in-out both;
+}
+
+.thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+.thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes thinking-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Empty-state suggestion chips */
+.suggestion-chips {
+  padding: 4px 0 12px;
+}
+
+.suggestion-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--signal-amber);
+  color: var(--signal-amber);
+}
+
+.explain-box {
+  margin-top: 10px;
+}
+
+.explain-toggle-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px dashed var(--signal-blue, #4FC3F7);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.explain-toggle-btn:hover {
+  background: var(--bg-panel);
+}
+
+.explain-panel {
+  margin-top: 10px;
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.explain-text {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Departure/arrival calendar dates - recalculated daily since they're based on today */
+.route-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Badge shown when a journey arrives on a later calendar day (e.g. +1d) */
+.day-offset-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal-amber);
+  vertical-align: super;
+  margin-left: 3px;
+}
+
+/* Delay Explainer - visually distinct from the risk analyzer (blue accent) */
+.delay-explainer {
+  margin-top: 10px;
+}
+
+.explain-toggle-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px dashed var(--signal-blue);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.explain-toggle-btn:hover {
+  background: var(--bg-panel);
+  color: var(--signal-blue);
+}
+
+.explain-panel {
+  margin-top: 10px;
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.explain-text {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
 }

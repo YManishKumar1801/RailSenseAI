@@ -1,0 +1,190 @@
+.sidebar {
+  width: 240px;
+  background: var(--bg-panel);
+  border-right: 0.5px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  flex-shrink: 0;
+  height: 100vh;
+}
+
+.new-chat-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 0.5px dashed var(--signal-amber);
+  background: transparent;
+  color: var(--signal-amber);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.new-chat-btn:hover {
+  background: var(--bg-card);
+}
+
+.conversation-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 10px 4px;
+}
+
+.sidebar-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 8px 4px;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  gap: 6px;
+}
+
+.conversation-item:hover {
+  background: var(--bg-card);
+}
+
+.conversation-item.active {
+  background: var(--bg-card);
+  border-left: 2px solid var(--signal-amber);
+}
+
+.conversation-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.conversation-item:hover .item-actions {
+  opacity: 1;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+.rename-input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 0.5px solid var(--signal-amber);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  padding: 4px 6px;
+}
+
+.confirm-delete-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: 100%;
+}
+
+.confirm-yes, .confirm-no {
+  border: none;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.confirm-yes {
+  background: var(--signal-red);
+  color: #2b0a0a;
+  font-weight: 700;
+}
+
+.confirm-no {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+.sidebar-account {
+  border-top: 0.5px solid var(--border-color);
+  padding-top: 12px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-email {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 0.5px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  border-color: var(--signal-red);
+}

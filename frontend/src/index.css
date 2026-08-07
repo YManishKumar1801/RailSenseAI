@@ -27,3 +27,23 @@ body {
   font-family: var(--font-heading);
   background: var(--bg-primary);
 }
+
+/* Custom scrollbar - matches the control-room theme instead of default browser bars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--signal-amber);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--bg-primary);
+}
