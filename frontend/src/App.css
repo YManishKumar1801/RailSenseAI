@@ -458,7 +458,7 @@
   margin-top: 6px;
 }
 
-/* Message entrance animation - subtle, not jarring */
+
 .message {
   animation: message-in 0.25s ease-out;
 }
@@ -468,7 +468,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Animated "thinking" dots instead of plain text */
+
 .thinking-bubble {
   padding: 14px 16px;
 }
@@ -494,7 +494,7 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* Empty-state suggestion chips */
+
 .suggestion-chips {
   padding: 4px 0 12px;
 }
@@ -562,7 +562,7 @@
   margin: 0;
 }
 
-/* Departure/arrival calendar dates - recalculated daily since they're based on today */
+
 .route-date {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -570,7 +570,7 @@
   margin-top: 2px;
 }
 
-/* Badge shown when a journey arrives on a later calendar day (e.g. +1d) */
+
 .day-offset-badge {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -579,7 +579,7 @@
   margin-left: 3px;
 }
 
-/* Delay Explainer - visually distinct from the risk analyzer (blue accent) */
+
 .delay-explainer {
   margin-top: 10px;
 }

@@ -28,7 +28,7 @@ body {
   background: var(--bg-primary);
 }
 
-/* Custom scrollbar - matches the control-room theme instead of default browser bars */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

@@ -36,9 +36,7 @@ function todayDateString() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Computes departure/arrival calendar dates using TODAY as the reference departure day.
-// Recalculated fresh on every render, so it always reflects the current real-world date -
-// e.g. viewed on Aug 7 it shows Aug 7/8; viewed tomorrow it shifts automatically.
+
 function getScheduleDates(train) {
   const todayStr = todayDateString();
   const departureDT = new Date(`${todayStr}T${train.departure_time}`);
@@ -58,7 +56,7 @@ function getScheduleDates(train) {
   };
 }
 
-// ---- Journey Risk Analyzer (part of each TrainCard) ----
+
 function JourneyRiskAnalyzer({ train }) {
   const [open, setOpen] = useState(false);
   const [journeyDate, setJourneyDate] = useState(todayDateString());
@@ -86,7 +84,7 @@ function JourneyRiskAnalyzer({ train }) {
       expectedDelay = res.data.predicted_delay_minutes;
       usedML = true;
     } catch (err) {
-      // ML service down or train not recognized - silently fall back to average
+      
     }
 
     const departureDT = new Date(`${journeyDate}T${train.departure_time}`);
@@ -168,7 +166,7 @@ function JourneyRiskAnalyzer({ train }) {
   );
 }
 
-// ---- Delay Explainer (Gemini-powered, part of each TrainCard) ----
+
 function DelayExplainer({ train }) {
   const [open, setOpen] = useState(false);
   const [explanation, setExplanation] = useState(null);
@@ -179,7 +177,7 @@ function DelayExplainer({ train }) {
     const nextOpen = !open;
     setOpen(nextOpen);
 
-    // Only fetch once - cache the result so re-opening doesn't re-call Gemini
+    
     if (nextOpen && !explanation && !loadingExplanation) {
       setLoadingExplanation(true);
       setError('');
@@ -215,9 +213,7 @@ function DelayExplainer({ train }) {
 }
 
 function TrainCard({ train, windowUsed }) {
-  // If this card came from a route search, show the SAME window-specific number
-  // that was actually used to rank it (30/60/90 day on-time %) instead of the
-  // blended overall score — otherwise the "Recommended" pick can look inconsistent.
+ 
   const displayScore = windowUsed ? train[`on_time_pct_${windowUsed}d`] : train.punctuality_score;
   const scoreLabel = windowUsed ? `Punctuality (${windowUsed}d)` : "Punctuality";
   const v = verdictFor(displayScore);
@@ -410,8 +406,8 @@ function App() {
       const { reply, trains, context } = res.data;
 
       if (trains && trains.length > 0) {
-        // Route searches always rank by a specific window (default 90d) - carry that
-        // through so the card can show the matching number, not the blended score.
+        
+        
         const windowUsed = (context?.source && context?.destination)
           ? (context.time_window || 90)
           : null;
